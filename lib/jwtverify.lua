@@ -231,7 +231,7 @@ local publicKeyPath = os.getenv("OAUTH_PUBKEY_PATH")
 -- when using an HS256 or HS512 signature
 config.hmacSecret = os.getenv("OAUTH_HMAC_SECRET")
 
-log("PublicKeyPath: " .. publicKeyPath)
+-- log("PublicKeyPath: " .. publicKeyPath)
 log("Issuer: " .. (config.issuer or "<none>"))
 log("Audience: " .. (config.audience or "<none>"))
 end)

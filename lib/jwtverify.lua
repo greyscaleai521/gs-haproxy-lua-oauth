@@ -71,6 +71,7 @@ local function decodeJwt(JWT_Token_Cookie)
   local tokenFields = core.tokenize(JWT_Token_Cookie, " .")
 
   if #tokenFields ~= 3 then
+      print("Improperly formated JWT_Token cookie. Should be a JWT token with 3 token sections separated by .")
       log("Improperly formated JWT_Token cookie. Should be a JWT token with 3 token sections separated by .")
       return nil
   end
@@ -88,6 +89,10 @@ local function decodeJwt(JWT_Token_Cookie)
   log('JWT_Token: ' .. JWT_Token_Cookie)
   log('Decoded JWT header: ' .. dump(token.headerdecoded))
   log('Decoded JWT payload: ' .. dump(token.payloaddecoded))
+
+  print('JWT_Token: ' .. JWT_Token_Cookie)
+  print('Decoded JWT header: ' .. dump(token.headerdecoded))
+  print('Decoded JWT payload: ' .. dump(token.payloaddecoded))
 
   return token
 end
@@ -143,15 +148,18 @@ function jwtverify(txn)
   local hmacSecret = config.hmacSecret
 
   -- 1. Decode and parse the JWT Token
+  print("Decode JWT TOken")
   local token = decodeJwt(txn.sf:req_cook("JWT_Token"))
 
   if token == nil then
+    print("Token could not be decoded.")
     log("Token could not be decoded.")
     goto out
   end
 
   -- 2. Verify the signature algorithm is supported (HS256, HS512, RS256)
   if algorithmIsValid(token) == false then
+      print("Algorithm not valid.")
       log("Algorithm not valid.")
       goto out
   end
@@ -159,16 +167,19 @@ function jwtverify(txn)
   -- 3. Verify the signature with the certificate
   if token.headerdecoded.alg == 'RS256' then
     if rs256SignatureIsValid(token, pem) == false then
+      print("Signature not valid.")
       log("Signature not valid.")
       goto out
     end
   elseif token.headerdecoded.alg == 'HS256' then
     if hs256SignatureIsValid(token, hmacSecret) == false then
+      print("Signature not valid.")
       log("Signature not valid.")
       goto out
     end
   elseif token.headerdecoded.alg == 'HS512' then
     if hs512SignatureIsValid(token, hmacSecret) == false then
+      print("Signature not valid.")
       log("Signature not valid.")
       goto out
     end
@@ -176,18 +187,21 @@ function jwtverify(txn)
 
   -- 4. Verify that the token is not expired
   if expirationIsValid(token) == false then
+    print("Token is expired.")
     log("Token is expired.")
     goto out
   end
 
   -- 5. Verify the issuer
   if issuer ~= nil and issuerIsValid(token, issuer) == false then
+    print("Issuer not valid.")
     log("Issuer not valid.")
     goto out
   end
 
   -- 6. Verify the audience
   if audience ~= nil and audienceIsValid(token, audience) == false then
+    print("Audience not valid.")
     log("Audience not valid.")
     goto out
   end
@@ -200,6 +214,7 @@ function jwtverify(txn)
   end
 
   -- 8. Set authorized variable
+  print("req.authorized = true")
   log("req.authorized = true")
   txn.set_var(txn, "txn.authorized", true)
 
@@ -208,6 +223,7 @@ function jwtverify(txn)
 
   -- way out. Display a message when running in debug mode
 ::out::
+ print("req.authorized = false")
  log("req.authorized = false")
  txn.set_var(txn, "txn.authorized", false)
 end

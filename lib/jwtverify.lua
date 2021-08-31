@@ -143,7 +143,7 @@ function jwtverify(txn)
   local hmacSecret = config.hmacSecret
 
   -- 1. Decode and parse the JWT Token
-  local token = decodeJwt(txn.sf:req.cook("JWT_Token"))
+  local token = decodeJwt(txn.sf:req_cook("JWT_Token"))
 
   if token == nil then
     log("Token could not be decoded.")

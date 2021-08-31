@@ -67,30 +67,25 @@ function readAll(file)
   return content
 end
 
-local function decodeJwt(authorizationHeader)
-  local headerFields = core.tokenize(authorizationHeader, " .")
+local function decodeJwt(JWT_Token_Cookie)
+  local tokenFields = core.tokenize(JWT_Token_Cookie, " .")
 
-  if #headerFields ~= 4 then
-      log("Improperly formated Authorization header. Should be 'Bearer' followed by 3 token sections.")
-      return nil
-  end
-
-  if headerFields[1] ~= 'Bearer' then
-      log("Improperly formated Authorization header. Missing 'Bearer' property.")
+  if #tokenFields ~= 3 then
+      log("Improperly formated JWT_Token cookie. Should be a JWT token with 3 token sections separated by .")
       return nil
   end
 
   local token = {}
-  token.header = headerFields[2]
+  token.header = tokenFields[1]
   token.headerdecoded = json.decode(base64.decode(token.header))
 
-  token.payload = headerFields[3]
+  token.payload = tokenFields[2]
   token.payloaddecoded = json.decode(base64.decode(token.payload))
 
-  token.signature = headerFields[4]
+  token.signature = tokenFields[3]
   token.signaturedecoded = base64.decode(token.signature)
 
-  log('Authorization header: ' .. authorizationHeader)
+  log('JWT_Token: ' .. JWT_Token_Cookie)
   log('Decoded JWT header: ' .. dump(token.headerdecoded))
   log('Decoded JWT payload: ' .. dump(token.payloaddecoded))
 
@@ -147,8 +142,8 @@ function jwtverify(txn)
   local audience = config.audience
   local hmacSecret = config.hmacSecret
 
-  -- 1. Decode and parse the JWT
-  local token = decodeJwt(txn.sf:req_hdr("Authorization"))
+  -- 1. Decode and parse the JWT Token
+  local token = decodeJwt(txn.sf:req.cook("JWT_Token"))
 
   if token == nil then
     log("Token could not be decoded.")

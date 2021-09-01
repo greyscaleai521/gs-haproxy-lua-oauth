@@ -68,6 +68,8 @@ function readAll(file)
 end
 
 local function decodeJwt(JWT_Token_Cookie)
+  print("Printing JWT Token Cookie")
+  print(JWT_Token_Cookie)
   local tokenFields = core.tokenize(JWT_Token_Cookie, " .")
 
   if #tokenFields ~= 3 then

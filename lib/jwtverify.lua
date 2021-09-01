@@ -184,7 +184,6 @@ function jwtverify(txn)
 
   -- 5. Verify the issuer
   if issuer ~= nil and issuerIsValid(token, issuer) == false then
-    print("Issuer not valid.")
     log("Issuer not valid.")
     goto out
   end
